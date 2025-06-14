@@ -1,3 +1,6 @@
+import { endpointsList } from '../endpoints.js';
+import fetch from 'node-fetch';
+
 const OPEN_AI_KEY = process.env.OPENAI_API_KEY;
 const OPEN_AI_URL = process.env.OPENAI_API_URL || "https://api.openai.com/v1/chat/completions";
 const OPEN_AI_MODEL = process.env.OPENAI_MODEL || "gpt-3.5-turbo";
