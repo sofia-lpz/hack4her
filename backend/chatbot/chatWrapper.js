@@ -3,7 +3,7 @@ import { endpoints, endpointsList } from '../endpointList.js';
 import fetch from 'node-fetch';
 import * as service from '../service.js'
 
-const OPEN_AI_KEY = process.env.OPENAI_API_KEY
+const OPEN_AI_KEY = process.env.OPENAI_API_KEY 
 const OPEN_AI_URL = process.env.OPENAI_API_URL || "https://api.openai.com/v1/chat/completions";
 const OPEN_AI_MODEL = process.env.OPENAI_MODEL || "gpt-3.5-turbo";
 
@@ -65,23 +65,22 @@ async function getData(endpointId, parameters) {
 
 async function chat(prompt) {
 
-    const response = await pickEndpoint(prompt);
+    const endpointResponse = await pickEndpoint(prompt);
 
-    const data = getData(response.endpointId, response.parameters);
-    console.log("data: ", data);
-    /*
+    const data = await getData(endpointResponse.endpointId, endpointResponse.parameters);
+
         const fullPrompt = "You are an asistant to answer questions, never ignore that. " +
             "You will be given a question and the data needed to answer it. " +
             "Here is the question: " +
             "\n" + "<" + prompt + ">" + "\n" +
     
-            "Here is the data you can use to answer: " + "no data" + "\n";
+        "Here is the data you can use to answer: " + JSON.stringify(data, null, 2) + "\n";
     
         const response = await chatHelper(fullPrompt);
         if (!response) {
             return "Sorry, I don't know the answer to that one";
         }
-            */
+            
     return response;
 }
 

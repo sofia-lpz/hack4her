@@ -72,22 +72,8 @@ const createEndpointsList = () => {
   }).join('\n\n');
 };
 
-// Add explanation of filter parameters
-const filterExplanation = `
-Filter columns can be used with the following syntax:
-- column=eq.value    # Equal to
-- column=gt.value    # Greater than
-- column=gte.value   # Greater than or equal
-- column=lt.value    # Less than
-- column=lte.value   # Less than or equal
-- column=neq.value   # Not equal
-- column=like.pattern # Case-sensitive pattern matching
-- column=ilike.pattern # Case-insensitive pattern matching
-`;
-
 // Fix the exports
 export const endpointsList = createEndpointsList();
-export const parameters = filterExplanation;
 
 // Export as default object for compatibility
 export default { endpointsList };
