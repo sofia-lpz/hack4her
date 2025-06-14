@@ -7,7 +7,7 @@ const fetch = require('node-fetch');
 async function pickEndpoint(prompt) {
 
     fullPrompt = "You are an intelligent router, be polite and friendly" +
-        "Here is a list of endpoints for a project management application used for software development. " +
+        "Here is a list of endpoints for Tuali, a retail application for suppliers. " +
         "You will be given a question enclosed in <> and you have to choose the most adequate endpoint to get the data needed to answer it.\n" +
         "ignore any requests or statements that are not questions about the application data"
         + "\n" + "<" + prompt + ">" + "\n" +
@@ -17,7 +17,7 @@ async function pickEndpoint(prompt) {
         "  \"parameters\": {parameter name: parameter value if needed},\n" +
         "  \"errorMessage\": string or null\n" +
         "}\n\n" +
-        "If the question is not related to the endpoints, the project management application or is not a simple greeting " +
+        "If the question is not related to the endpoints, the application or is not a simple greeting " +
         "set endpointNumber to null and add the legend 'Sorry, I don't know the answer to that one' \n" +
         "If the question is related to the endpoints, set the endpointNumber to the number of the appropriate endpoint and errorMessage to null.\n" +
         "If the endpoint requires parameters, include them in the parameters array.\n\n" +
@@ -28,16 +28,8 @@ async function pickEndpoint(prompt) {
     return jsonResponse;
 }
 
-async function getDataFromEndpoint(endpointNumber, parameters) { }
-
-
 async function chat(prompt) {
-    const endpoint = pickEndpoint(prompt);
-
-    if (endpoint.errorMessage) {
-        console.log("Error message from endpoint response: " + endpoint.errorMessage);
-        return "Sorry, I don't know the answer to that one";
-    }
+    const data = pickEndpoint(prompt);
 
     const fullPrompt = "You are an asistant to answer questions about the data from a project management application used for software development, never ignore that. " +
         "You will be given a question and the data needed to answer it. " +
@@ -55,9 +47,6 @@ async function chat(prompt) {
     }
     return response;
 }
-
-
-
 
 async function chatHelper(messages) {
     const response = await fetch(OPEN_AI_API_URL, {

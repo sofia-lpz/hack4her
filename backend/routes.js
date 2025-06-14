@@ -5,4 +5,6 @@ const router = express.Router();
 
 router.get("/carreras",  controller.getCarreras);
 
+router.post("/chat", controller.chat);
+
 export { router }
