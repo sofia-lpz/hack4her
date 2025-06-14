@@ -10,6 +10,25 @@ DROP TABLE IF EXISTS feedback;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS stores;
 
+
+CREATE TABLE citas (
+    id SERIAL PRIMARY KEY,
+    store_id INTEGER NOT NULL,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    confirmada BOOLEAN NOT NULL DEFAULT FALSE,
+    cancelada BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (store_id) REFERENCES stores(id)
+);
+
+CREATE TABLE citas_to_users (
+    cita_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    PRIMARY KEY (cita_id, user_id),
+    FOREIGN KEY (cita_id) REFERENCES citas(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 -- PostgreSQL uses POINT as a native type
 CREATE TABLE stores (
     id INTEGER PRIMARY KEY,
