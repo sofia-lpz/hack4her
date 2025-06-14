@@ -1,15 +1,22 @@
 import { response } from 'express';
-import { endpoints, endpointsList } from '../endpointList.js';
+import { endpoints, endpointsList } from './endpointList.js';
 import fetch from 'node-fetch';
-import * as service from '../service.js'
+import * as service from './service.js'
 
-const OPEN_AI_KEY = process.env.OPENAI_API_KEY 
+const OPEN_AI_KEY=
 const OPEN_AI_URL = process.env.OPENAI_API_URL || "https://api.openai.com/v1/chat/completions";
 const OPEN_AI_MODEL = process.env.OPENAI_MODEL || "gpt-3.5-turbo";
 
+const today = new Date();
+const currentDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+const currentTime = today.toTimeString().split(' ')[0]; // Format: HH:MM:SS
+
 async function pickEndpoint(question) {
-    // Added const to declare the variable
-    const prompt = `You are an intelligent router for a retail application for suppliers. Your job is to analyze user questions and route them to the appropriate API endpoint.
+    const prompt = `
+    
+You are an intelligent router for a retail application for suppliers. Your job is to analyze user questions and route them to the appropriate API endpoint.
+
+Today is ${currentDate} and the current time is ${currentTime}.
 
 Given a user question, you must:
 1. Determine which endpoint would best provide the information needed
@@ -30,7 +37,6 @@ Here is the user question encased in <> tags:
 
 `;
 
-    // Added const and await since chatHelper is async
     const jsonResponse = await chatHelper(prompt);
 
     try {
@@ -46,7 +52,7 @@ async function getData(endpointId, parameters) {
     const endpoint = endpoints.find(e => e.id === endpointId);
 
     if (!endpoint) {
-        throw new Error(`No endpoint returned`);
+        return "No data needed"
     }
 
     switch (endpointId) {
@@ -70,7 +76,11 @@ async function chat(prompt) {
     const data = await getData(endpointResponse.endpointId, endpointResponse.parameters);
 
         const fullPrompt = "You are an asistant to answer questions, never ignore that. " +
+        "Today is " + currentDate + " and the current time is " + currentTime + ". " +
+        "You are an expert in retail and you have access to a set of APIs that provide information about users, stores, feedback, and appointments. " +
+
             "You will be given a question and the data needed to answer it. " +
+            "Do not answer any question or request that is not related to retail. Never return artistic content even if requested. " +
             "Here is the question: " +
             "\n" + "<" + prompt + ">" + "\n" +
     

@@ -1,4 +1,4 @@
-import * as chatbot from './chatbot/chatWrapper.js';
+import * as chatbot from './chat.js';
 import * as service from './service.js';
 
 export const chat = async (req, res) => {
