@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
-import geojsonData from './assets/mapa.json';
+import geojsonData from '../../assets/mapa.json';
 
 export default function AddCita() {
   const users = ['María López', 'Carlos Ruiz', 'Ana Torres', 'Luis García'];

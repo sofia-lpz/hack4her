@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,83 +7,85 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import geojsonData from './assets/mapa.json';
+import { fetchCitas, fetchStores } from '../api/dataProvider';
 
 export default function Citas() {
-  const tiendas = geojsonData.features.map(f => f.properties.nombre);
+  const [citas, setCitas] = useState([]);
+  const [stores, setStores] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [citas, setCitas] = useState([
-    {
-      id: '1',
-      tienda: 'OXXO Paseo del Acueducto',
-      fecha: '2025-06-15 10:00',
-      estado: 'pendiente',
-      completada: false,
-    },
-    {
-      id: '2',
-      tienda: 'H-E-B Contry',
-      fecha: '2025-06-10 16:30',
-      estado: 'cancelada',
-      completada: false,
-    },
-    {
-      id: '3',
-      tienda: 'OXXO Paseo del Acueducto',
-      fecha: '2025-06-05 09:00',
-      estado: 'confirmada',
-      completada: true,
-    },
-    {
-      id: '4',
-      tienda: 'H-E-B Contry',
-      fecha: '2025-06-18 14:00',
-      estado: 'pendiente',
-      completada: false,
-    },
-  ]);
+  // Load data when component mounts
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const agregarCita = () => {
-    if (Platform.OS === 'ios') {
-      Alert.prompt(
-        'Nueva cita',
-        'Escribe el nombre exacto de la tienda:',
-        nombreTienda => {
-          if (!nombreTienda) return;
-          const tiendaValida = tiendas.find(
-            t => t.toLowerCase() === nombreTienda.toLowerCase()
-          );
-          if (tiendaValida) {
-            const nuevaCita = {
-              id: Date.now().toString(),
-              tienda: tiendaValida,
-              fecha: new Date().toLocaleString(),
-              estado: 'pendiente',
-              completada: false,
-            };
-            setCitas([...citas, nuevaCita]);
-          } else {
-            Alert.alert(
-              'Tienda no encontrada',
-              'Asegúrate de escribir el nombre correctamente.'
-            );
-          }
-        }
-      );
-    } else {
-      Alert.alert('Agregar cita', 'Esta función está simulada solo para iOS.');
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Fetch both citas and stores data
+      const [citasResponse, storesResponse] = await Promise.all([
+        fetchCitas(),
+        fetchStores()
+      ]);
+
+      if (citasResponse.success) {
+        setCitas(citasResponse.data);
+      } else {
+        throw new Error('Failed to fetch citas');
+      }
+
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const toggleCompletada = id => {
-    setCitas(prev =>
-      prev.map(cita =>
-        cita.id === id ? { ...cita, completada: !cita.completada } : cita
-      )
-    );
+  // Get store name by store_id
+  const getStoreName = (storeId) => {
+    const store = stores.find(s => s.id === storeId);
+    return store ? store.name : `Store ID: ${storeId}`;
   };
+
+  // Format date and time for display
+  const formatDateTime = (date, time) => {
+    const dateObj = new Date(date);
+    const [hours, minutes] = time.split(':');
+    dateObj.setHours(parseInt(hours), parseInt(minutes));
+    
+    return dateObj.toLocaleString('es-MX', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  // Determine appointment status based on API fields
+  const getAppointmentStatus = (cita) => {
+    if (cita.cancelada) return 'cancelada';
+    if (cita.confirmada) return 'confirmada';
+    return 'pendiente';
+  };
+
+  // Check if appointment is completed (past date)
+  const isAppointmentCompleted = (date, time) => {
+    const appointmentDateTime = new Date(date);
+    const [hours, minutes] = time.split(':');
+    appointmentDateTime.setHours(parseInt(hours), parseInt(minutes));
+    
+    return appointmentDateTime < new Date();
+  };
+
+
 
   const getCheckColor = estado => {
     switch (estado) {
@@ -106,46 +108,98 @@ export default function Citas() {
     />
   );
 
+  // Sort appointments: incomplete first, then by date
   const citasOrdenadas = [...citas].sort((a, b) => {
-    if (a.completada === b.completada) return 0;
-    return a.completada ? 1 : -1;
+    const aCompleted = isAppointmentCompleted(a.date, a.time);
+    const bCompleted = isAppointmentCompleted(b.date, b.time);
+    
+    if (aCompleted === bCompleted) {
+      // If both have same completion status, sort by date
+      return new Date(a.date) - new Date(b.date);
+    }
+    return aCompleted ? 1 : -1;
   });
+
+  // Loading state
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#C31F39" />
+        <Text style={styles.loadingText}>Cargando citas...</Text>
+      </View>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Ionicons name="alert-circle" size={50} color="#C31F39" />
+        <Text style={styles.errorText}>Error al cargar las citas</Text>
+        <Text style={styles.errorSubtext}>{error}</Text>
+        <TouchableOpacity onPress={loadData} style={styles.retryButton}>
+          <Text style={styles.retryButtonText}>Reintentar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Mis Citas</Text>
-        <TouchableOpacity onPress={agregarCita} style={styles.addButton}>
-          <Ionicons name="add-circle" size={30} color="#C31F39" />
-        </TouchableOpacity>
       </View>
 
       {citas.length === 0 ? (
-        <Text style={styles.empty}>No tienes citas aún.</Text>
+        <View style={styles.centered}>
+          <Ionicons name="calendar-outline" size={50} color="#888" />
+          <Text style={styles.empty}>No tienes citas aún.</Text>
+        </View>
       ) : (
         <FlatList
           data={citasOrdenadas}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.citaItem,
-                item.completada && { backgroundColor: '#f2f2f2', borderColor: '#ccc' },
-              ]}
-            >
-              <View style={{ flex: 1 }}>
-                <Text style={styles.citaTienda}>{item.tienda}</Text>
-                <Text style={styles.citaFecha}>{item.fecha}</Text>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => toggleCompletada(item.id)}
-                style={styles.checkbox}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({ item }) => {
+            const status = getAppointmentStatus(item);
+            const completed = isAppointmentCompleted(item.date, item.time);
+            const storeName = getStoreName(item.store_id);
+            const dateTime = formatDateTime(item.date, item.time);
+            
+            return (
+              <View
+                style={[
+                  styles.citaItem,
+                  completed && { backgroundColor: '#f2f2f2', borderColor: '#ccc' },
+                ]}
               >
-                {renderCheck(item.completada, item.estado)}
-              </TouchableOpacity>
-            </View>
-          )}
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.citaTienda}>{storeName}</Text>
+                  <Text style={styles.citaFecha}>{dateTime}</Text>
+                  
+                  {/* Show users assigned to this appointment */}
+                  {item.users && item.users.length > 0 && (
+                    <Text style={styles.citaUsers}>
+                      Asignado a: {item.users.map(u => `${u.first_name} ${u.last_name}`).join(', ')}
+                    </Text>
+                  )}
+                  
+                  {/* Status indicator */}
+                  <View style={styles.statusContainer}>
+                    <View style={[styles.statusDot, { backgroundColor: getCheckColor(status) }]} />
+                    <Text style={[styles.statusText, { color: getCheckColor(status) }]}>
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.checkboxContainer}>
+                  {renderCheck(completed, status)}
+                </View>
+              </View>
+            );
+          }}
+          refreshing={loading}
+          onRefresh={loadData}
         />
       )}
     </View>
@@ -157,7 +211,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     paddingTop: 60,
-    backgroundColor: '#f6f8fa', // igual al fondo del login
+    backgroundColor: '#f6f8fa',
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -173,8 +231,38 @@ const styles = StyleSheet.create({
   addButton: {
     padding: 4,
   },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorText: {
+    marginTop: 10,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#C31F39',
+    textAlign: 'center',
+  },
+  errorSubtext: {
+    marginTop: 5,
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#C31F39',
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   empty: {
-    marginTop: 40,
+    marginTop: 10,
     fontSize: 16,
     textAlign: 'center',
     color: '#888',
@@ -189,7 +277,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e0e0e0',
-
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -205,8 +292,29 @@ const styles = StyleSheet.create({
   citaFecha: {
     fontSize: 14,
     color: '#555',
+    marginBottom: 4,
   },
-  checkbox: {
+  citaUsers: {
+    fontSize: 12,
+    color: '#777',
+    fontStyle: 'italic',
+    marginBottom: 6,
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  checkboxContainer: {
     marginLeft: 12,
   },
 });
