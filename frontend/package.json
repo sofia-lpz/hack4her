@@ -10,14 +10,20 @@
   },
   "dependencies": {
     "@react-native-community/checkbox": "^0.5.20",
+    "@react-native-community/datetimepicker": "8.3.0",
+    "@react-native-picker/picker": "2.11.0",
     "@react-navigation/bottom-tabs": "^7.3.15",
     "@react-navigation/native": "^7.1.11",
     "axios": "^1.10.0",
     "expo": "~53.0.11",
+    "expo-file-system": "~18.1.10",
+    "expo-image-picker": "~16.1.4",
     "expo-status-bar": "~2.2.3",
+    "metro-react-native-babel-preset": "^0.77.0",
     "react": "19.0.0",
     "react-native": "0.79.3",
     "react-native-chart-kit": "^6.12.0",
+    "react-native-dropdown-picker": "^5.4.6",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-pager-view": "6.7.1",
     "react-native-reanimated": "~3.17.4",
@@ -25,11 +31,13 @@
     "react-native-screens": "~4.11.1",
     "react-native-svg": "^15.11.2",
     "react-native-vector-icons": "^10.2.0",
-    "expo-image-picker": "~16.1.4",
-    "expo-file-system": "~18.1.10"
+    "undefined": "@react-native-picker/"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@babel/plugin-transform-class-properties": "^7.27.1",
+    "@babel/plugin-transform-private-methods": "^7.27.1",
+    "@babel/plugin-transform-private-property-in-object": "^7.27.1"
   },
   "private": true
 }

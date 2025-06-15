@@ -316,6 +316,45 @@ export async function getCitas(filter = {}) {
   }
 }
 
+export async function postCitas(citaData) {
+  const client = await pool.connect();
+  try {
+    const { store_id, date, time, confirmada, cancelada, user_ids } = citaData;
+    // Validate required fields
+    if (!store_id || !date || !time) {
+      throw new Error('Store ID, date, and time are required');
+    }
+    // Insert new cita
+    const insertQuery = `
+      INSERT INTO citas (store_id, date, time, confirmada, cancelada)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING id`;
+    const insertParams = [store_id, date, time, confirmada || false, cancelada || false];
+    const result = await client.query(insertQuery, insertParams);
+    const citaId = result.rows[0].id;
+    console.log('Cita created successfully with ID:', citaId);
+    // If user_ids are provided, insert into citas_to_users
+    if (user_ids && user_ids.length > 0) {
+      const userInsertQuery = `
+        INSERT INTO citas_to_users (cita_id, user_id)
+        VALUES ${user_ids.map((_, index) => `($1, $${index + 2})`).join(', ')}
+        RETURNING *`;
+      const userInsertParams = [citaId, ...user_ids];
+      const userResult = await client.query(userInsertQuery, userInsertParams);
+      console.log(`${userResult.rowCount} users linked to cita ID ${citaId}`);
+    }
+    return { id: citaId, store_id, date, time, confirmada, cancelada };
+  }
+  catch (error) {
+    console.error('Error in postCitas:', error);
+    throw error;
+  }
+  finally {
+    client.release();
+    console.log('Connection released successfully');
+  }
+}
+
 export async function login(username, password) {
   const client = await pool.connect();
   try {
