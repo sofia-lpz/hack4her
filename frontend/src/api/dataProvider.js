@@ -1,5 +1,6 @@
 import axios from 'axios';
 const API_BASE_URL = 'http://10.22.138.54:8080/api';
+const SERVER_URL = 'http://10.22.138.54:8080/'
 const API_BASE_URL_SUPABASE = 'https://kjsganrpfhivqpruovrg.supabase.co/rest/v1/';
 const API_KEY = 'your_api_key_here';
 
@@ -157,6 +158,39 @@ export const fetchFeedbackSummary = async (storeId) => {
     throw error;
   }
 }
+
+export const postFeedback = async (feedbackData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL_SUPABASE}feedback`, feedbackData, {
+      headers: supabaseHeaders
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error posting feedback:', error);
+    throw error;
+  }
+}
+
+export const uploadFeedbackImage = async (imageFile) => {
+  const formData = new FormData();
+  formData.append('image', {
+    uri: imageFile.uri,
+    type: 'image/jpeg',
+    name: imageFile.filename || 'image.jpg'
+  });
+
+  try {
+    const response = await axios.post(`${SERVER_URL}upload-image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading feedback image:', error);
+    throw error;
+  }
+};
 
 //citas
 export const fetchCitas = async () => {
