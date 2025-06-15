@@ -205,8 +205,7 @@ export const fetchCitas = async () => {
 
 export const postCitas = async (feedbackData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL_SUPABASE}citas`, feedbackData, {
-      headers: supabaseHeaders
+    const response = await axios.post(`${API_BASE_URL}/citas`, feedbackData, {
     });
     return response.data;
   } catch (error) {
