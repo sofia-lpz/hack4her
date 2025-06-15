@@ -21,10 +21,8 @@ const { width } = Dimensions.get('window');
 const imageSize = (width - 60) / 3; // 3 images per row with padding
 
 export default function AddFeedbackScreen({ route, navigation }) {
-  // Get store data from navigation params
-  const { store } = { 
-    store: { id: 1, nombre: 'Seleccionar tienda' } 
-  };
+  const store_id = 1
+  const store_name = "Tienda de Ejemplo"; // Replace with actual store name if needed
   
   const [feedback, setFeedback] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -158,85 +156,42 @@ export default function AddFeedbackScreen({ route, navigation }) {
     return await Promise.all(uploadPromises);
   };
 
-  const handleSend = async () => {
-    if (!feedback.trim()) {
-      Alert.alert('Error', 'Por favor escribe tu comentario antes de enviar');
-      return;
-    }
+const handleSend = async () => {
+  if (!feedback.trim()) {
+    Alert.alert('Error', 'Por favor escribe tu comentario antes de enviar');
+    return;
+  }
 
-    if (!store.id) {
-      Alert.alert('Error', 'No se ha seleccionado una tienda');
-      return;
-    }
+  if (!store_id) {
+    Alert.alert('Error', 'No se ha seleccionado una tienda');
+    return;
+  }
 
-    setIsLoading(true);
-
+  setIsLoading(true);
+  
+  try {
+    // Then post the feedback with image references
+    await postFeedbackMessage();
+  } catch (error) {
+    console.error('Error during feedback submission:', error);
+    Alert.alert('Error', 'No se pudo enviar el comentario. Intenta más tarde.');
+  } finally {
+    setIsLoading(false);
+  }
+};
+  const postFeedbackMessage = async () => {
     try {
-      let uploadedImages = [];
-      
-      // Upload images if any are attached
-      if (attachedImages.length > 0) {
-        console.log(`Starting upload of ${attachedImages.length} images...`);
-        uploadedImages = await uploadImages(attachedImages);
-        
-        // Check if any images failed to upload
-        const failedUploads = uploadedImages.filter(img => !img.uploaded);
-        if (failedUploads.length > 0) {
-          console.warn(`${failedUploads.length} images failed to upload`);
-          // You might want to show a warning but still proceed with the feedback
-          Alert.alert(
-            'Advertencia',
-            `${failedUploads.length} de ${attachedImages.length} imágenes no se pudieron subir. ¿Deseas continuar?`,
-            [
-              { text: 'Cancelar', style: 'cancel', onPress: () => setIsLoading(false) },
-              { text: 'Continuar', onPress: () => proceedWithFeedbackSubmission(uploadedImages) }
-            ]
-          );
-          return;
-        }
-      }
-
-      await proceedWithFeedbackSubmission(uploadedImages);
-      
-    } catch (error) {
-      console.error('Error in handleSend:', error);
-      Alert.alert('Error', 'No se pudo enviar el comentario. Intenta más tarde.');
-      setIsLoading(false);
-    }
-  };
-
-  const proceedWithFeedbackSubmission = async (uploadedImages) => {
-    try {
-      // Prepare feedback data with uploaded image information
       const feedbackData = {
-        storeId: store.id,
+        user_id: 1,
+        store_id: store_id,  
         comment: feedback,
-        images: uploadedImages
-          .filter(img => img.uploaded) // Only include successfully uploaded images
-          .map(img => ({
-            filename: img.filename,
-            uri: img.uri,
-            width: img.width,
-            height: img.height,
-            uploadResult: img.uploadResult, // Include server response
-          })),
-        timestamp: new Date().toISOString(),
       };
 
-      // Submit the feedback with image references
-      // Uncomment and use the actual API call:
-      // await postFeedback(feedbackData);
-      
-      // Simulating API call with timeout for now
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('Feedback data sent:', feedbackData);
-      
-      const successfulUploads = uploadedImages.filter(img => img.uploaded).length;
+      response = await postFeedback(feedbackData);
       
       Alert.alert(
         'Comentario enviado', 
-        `Gracias por compartir tu experiencia${successfulUploads > 0 ? ` con ${successfulUploads} imagen(es)` : ''}`,
+      'Tu comentario ha sido enviado exitosamente.',
         [
           { text: 'OK', onPress: () => navigation.goBack() }
         ]
@@ -272,7 +227,7 @@ export default function AddFeedbackScreen({ route, navigation }) {
         {/* Header with store info */}
         <View style={styles.storeInfoContainer}>
           <Ionicons name="location" size={24} color="#C31F39" />
-          <Text style={styles.storeName}>{store.nombre}</Text>
+          <Text style={styles.storeName}>{store_name}</Text>
         </View>
 
         {/* Feedback input */}
