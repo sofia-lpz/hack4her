@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { fetchChat } from '../api/dataProvider';
@@ -72,57 +73,60 @@ export default function ChatbotScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={90}
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
+      <View style={styles.container}>
+        {/* Bot icon */}
+        <View style={styles.iconContainer}>
+          <Ionicons name="chatbubble-ellipses" size={60} color="#C31F39" />
+        </View>
 
-      {/* Bot icon */}
-      <View style={styles.iconContainer}>
-        <Ionicons name="chatbubble-ellipses" size={60} color="#C31F39" />
-      </View>
-
-      {/* Chat messages */}
-      <ScrollView 
-        style={styles.messages} 
-        contentContainerStyle={{ paddingBottom: 20 }}
-        ref={scrollViewRef}
-        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
-      >
-        {chatMessages.map((msg, index) => (
-          <View 
-            key={index} 
-            style={msg.isUser ? styles.bubbleRight : styles.bubbleLeft}
-          >
-            <Text style={msg.isUser ? styles.bubbleRightText : styles.bubbleLeftText}>
-              {msg.text}
-            </Text>
-          </View>
-        ))}
-        {isLoading && (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#C31F39" />
-          </View>
-        )}
-      </ScrollView>
-
-      {/* Input */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder="Habla con el asistente virtual"
-          placeholderTextColor="#888"
-          value={message}
-          onChangeText={setMessage}
-          style={styles.input}
-          onSubmitEditing={handleSend}
-        />
-        <TouchableOpacity 
-          style={styles.sendButton} 
-          onPress={handleSend}
-          disabled={isLoading || !message.trim()}
+        {/* Chat messages */}
+        <ScrollView
+          style={styles.messages}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          ref={scrollViewRef}
+          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+          keyboardShouldPersistTaps="handled"
         >
-          <Ionicons name="send" size={20} color="#fff" />
-        </TouchableOpacity>
+          {chatMessages.map((msg, index) => (
+            <View
+              key={index}
+              style={msg.isUser ? styles.bubbleRight : styles.bubbleLeft}
+            >
+              <Text style={msg.isUser ? styles.bubbleRightText : styles.bubbleLeftText}>
+                {msg.text}
+              </Text>
+            </View>
+          ))}
+          {isLoading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color="#C31F39" />
+            </View>
+          )}
+        </ScrollView>
+
+        {/* Input */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Habla con el asistente virtual"
+            placeholderTextColor="#888"
+            value={message}
+            onChangeText={setMessage}
+            style={styles.input}
+            onSubmitEditing={handleSend}
+            returnKeyType="send"
+          />
+          <TouchableOpacity
+            style={styles.sendButton}
+            onPress={handleSend}
+            disabled={isLoading || !message.trim()}
+          >
+            <Ionicons name="send" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -173,18 +177,15 @@ const styles = StyleSheet.create({
     color: '#888',
   },
   inputContainer: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-    backgroundColor: '#f2f2f2',
-    flexDirection: 'row',
-    borderRadius: 30,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    alignItems: 'center',
-    elevation: 3,
-  },
+  backgroundColor: '#f2f2f2',
+  flexDirection: 'row',
+  borderRadius: 30,
+  paddingHorizontal: 15,
+  paddingVertical: 10,
+  alignItems: 'center',
+  margin: 20, // cambia esto si quieres más control en iOS
+  elevation: 3,
+},
   input: {
     flex: 1,
     color: '#000',

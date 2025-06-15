@@ -12,6 +12,7 @@ export default function Maps() {
   const navigation = useNavigation();
   const bottomSheetRef = useRef(null);
   const [selectedFeature, setSelectedFeature] = useState(null);
+  console.log(data);
   const features = data.features;
 
   const [aiSummary, setAiSummary] = useState('');
@@ -44,6 +45,9 @@ const handleMarkerPress = async (feature) => {
     });
   };
   
+  const handleNavigation = () => {
+    navigation.navigate('Feedback'); 
+  };
 
 
 
@@ -110,7 +114,7 @@ const handleMarkerPress = async (feature) => {
                     </View>
                   </View>
                   
-                  <View style={styles.metricRow}>
+                  {/* <View style={styles.metricRow}>
                     <Text style={styles.metricIcon}>📦</Text>
                     <View style={styles.metricTextContainer}>
                       <Text style={styles.metricLabel}>Fill Rate</Text>
@@ -140,8 +144,9 @@ const handleMarkerPress = async (feature) => {
                       <Text style={styles.metricLabel}>Resolution Time</Text>
                       <Text style={styles.metricValue}>{selectedFeature.properties.complaint_resolution_time_hrs} hrs</Text>
                     </View>
-                  </View>
+                  </View> */}
                 </View>
+
 
                 {/* Información de contacto */}
                 <View style={styles.infoContainer}>
@@ -152,23 +157,34 @@ const handleMarkerPress = async (feature) => {
                 </View>
 
                 {/* Botones de acción */}
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity 
-                    style={[styles.actionButton, styles.secondaryButton]}
-                    onPress={handleOpenMaps}
-                  >
-                    <Ionicons name="navigate-outline" size={20} color="#C31F39" />
-                    <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>Cómo llegar</Text>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity 
+                <View>
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity
+                      style={[styles.actionButton, styles.secondaryButton]}
+                      onPress={handleOpenMaps}
+                    >
+                      <Ionicons name="navigate-outline" size={20} color="#C31F39" />
+                      <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>Cómo llegar</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[styles.actionButton, styles.secondaryButton]}
+                      onPress={handleAddCita}
+                    >
+                      <Ionicons name="calendar-outline" size={20} color="#C31F39" />
+                      <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>Agregar Cita</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <TouchableOpacity
                     style={[styles.actionButton, styles.primaryButton]}
-                    onPress={handleAddCita}
+                    onPress={handleNavigation}
                   >
-                    <Ionicons name="calendar-outline" size={20} color="#fff" />
-                    <Text style={styles.actionButtonText}>Agendar Visita</Text>
+                    <Ionicons name="chatbubble-ellipses-outline" size={20} color="#fff" />
+                    <Text style={styles.actionButtonText}>Feedback</Text>
                   </TouchableOpacity>
                 </View>
+
               </ScrollView>
             )}
           </BottomSheetView>
@@ -303,6 +319,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginHorizontal: 5,
+    marginVertical: 8,
   },
   primaryButton: {
     backgroundColor: '#C31F39',
@@ -321,6 +338,25 @@ const styles = StyleSheet.create({
   secondaryButtonText: {
     color: '#C31F39',
   },
+  fullWidthButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8f8f8', // gris
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 20,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+
+  fullWidthButtonText: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginLeft: 8,
+  },
+
   summaryContainer: {
     marginVertical: 15,
     padding: 15,

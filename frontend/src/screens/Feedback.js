@@ -16,16 +16,16 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { postFeedback, uploadFeedbackImage } from '../api/dataProvider';
-import { useAuth } from '../api/context'; // Import your auth context
+import { AuthContext } from '../api/authContext'; 
 
 const { width } = Dimensions.get('window');
 const imageSize = (width - 60) / 3; // 3 images per row with padding
 
 export default function AddFeedbackScreen({ route, navigation }) {
-  const { user } = useAuth();
 
-    const { store_id, store_name } = route.params || {};
-  
+    // const { store_id, store_name } = route.params || {};
+    const store_id = 20;
+    let store_name = "Seven Eleven Parque Tecnológico"
   if (!store_id) {
     Alert.alert(
       'Error',
@@ -192,7 +192,7 @@ const handleSend = async () => {
   const postFeedbackMessage = async () => {
     try {
       const feedbackData = {
-        user_id: user.id,
+        user_id: 1,
         store_id: store_id,  
         comment: feedback,
       };
