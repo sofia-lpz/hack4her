@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Linking, ScrollView } from 'r
 import MapView, { Marker } from 'react-native-maps';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import geojsonData from './assets/mapa.json';
+import geojsonData from '../../assets/mapa.json';
 
 export default function Maps() {
   const bottomSheetRef = useRef(null);
