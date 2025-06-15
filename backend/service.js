@@ -91,3 +91,13 @@ export const getStats = async () => {
     throw err; // Re-throw to allow proper error handling in controller
   }
 }
+
+export const postCitas = async (citaData) => {
+  try {
+    const newCita = await mysql.postCitas(citaData);
+    return newCita;
+  } catch (err) {
+    console.error(err);
+    throw err; // Re-throw to allow proper error handling in controller
+  }
+}

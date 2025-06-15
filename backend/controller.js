@@ -235,3 +235,28 @@ export const getStats = async (req, res) => {
     });
   }
 }
+
+export const postCitas = async (req, res) => {
+  try {
+    const citaData = req.body;
+
+    if (!citaData || !citaData.date || !citaData.time || !citaData.store_id || !citaData.user_ids) {
+      return res.status(400).json({
+        success: false,
+        error: 'Date, time, store_id, and user_ids are required'
+      });
+    }
+    const newCita = await service.postCitas(citaData);
+    return res.status(201).json({
+      success: true,
+      data: newCita
+    });
+  }
+  catch (error) {
+    console.error('Error in postCitas endpoint:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'An error occurred while processing your request'
+    });
+  }
+}

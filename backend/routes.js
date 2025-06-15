@@ -12,6 +12,8 @@ router.get("/citas", controller.getCitas);
 router.post("/chat", controller.chat);
 
 
+router.post("/citas", controller.postCitas);
+
 //funcionales
 
 router.post("/login", controller.login);
