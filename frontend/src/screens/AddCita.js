@@ -229,14 +229,6 @@ const handleSubmit = async () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.link}>← Atrás</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Nueva Cita</Text>
-        <View style={{width: 50}} />
-      </View>
-
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.content}
@@ -464,26 +456,6 @@ const styles = StyleSheet.create({
   centered: {
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  header: {
-    paddingTop: Platform.OS === 'ios' ? 0 : 20,
-    paddingBottom: 10,
-    paddingHorizontal: 20,
-    borderBottomWidth: 2,
-    borderColor: '#d91c34',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#f6f8fa',
-  },
-  title: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: '#000',
-  },
-  link: {
-    color: '#d91c34',
-    fontWeight: '500',
   },
   content: {
     flex: 1,
