@@ -71,7 +71,7 @@ export const fetchUsersByRole = async (role) => {
 }
 
 //stores
-export const fecthStores = async () => {
+export const fetchStores = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL_SUPABASE}stores`, {
       headers: supabaseHeaders
@@ -195,10 +195,22 @@ export const uploadFeedbackImage = async (imageFile) => {
 //citas
 export const fetchCitas = async () => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/citas`, { prompt });
+    const response = await axios.get(`${API_BASE_URL}/citas`);
     return response.data;
   } catch (error) {
     console.error('Error fetching chat:', error);
+    throw error;
+  }
+}
+
+export const postCitas = async (feedbackData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL_SUPABASE}citas`, feedbackData, {
+      headers: supabaseHeaders
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error posting feedback:', error);
     throw error;
   }
 }

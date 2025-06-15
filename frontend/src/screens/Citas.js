@@ -10,9 +10,11 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { fetchCitas, fetchStores } from '../api/dataProvider';
 
 export default function Citas() {
+  const navigation = useNavigation();
   const [citas, setCitas] = useState([]);
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,36 +25,43 @@ export default function Citas() {
     loadData();
   }, []);
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Fetch both citas and stores data
-      const [citasResponse, storesResponse] = await Promise.all([
-        fetchCitas(),
-        fetchStores()
-      ]);
+const loadData = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    // Fetch both citas and stores data
+    const [citasResponse, storesResponse] = await Promise.all([
+      fetchCitas(),
+      fetchStores()
+    ]);
 
-      if (citasResponse.success) {
-        setCitas(citasResponse.data);
-      } else {
-        throw new Error('Failed to fetch citas');
-      }
-
-    } catch (err) {
-      console.error('Error loading data:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (citasResponse.success) {
+      setCitas(citasResponse.data);
+    } else {
+      throw new Error('Failed to fetch citas');
     }
-  };
+
+    // Store the stores data properly
+    if (storesResponse) {
+      setStores(storesResponse);
+    } else {
+      throw new Error('Failed to fetch stores');
+    }
+
+  } catch (err) {
+    console.error('Error loading data:', err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Get store name by store_id
-  const getStoreName = (storeId) => {
-    const store = stores.find(s => s.id === storeId);
-    return store ? store.name : `Store ID: ${storeId}`;
-  };
+const getStoreName = (storeId) => {
+  const store = stores.find(s => s.id === storeId);
+  return store ? store.nombre : `Store ID: ${storeId}`;
+};
 
   // Format date and time for display
   const formatDateTime = (date, time) => {
@@ -84,8 +93,6 @@ export default function Citas() {
     
     return appointmentDateTime < new Date();
   };
-
-
 
   const getCheckColor = estado => {
     switch (estado) {
@@ -120,6 +127,11 @@ export default function Citas() {
     return aCompleted ? 1 : -1;
   });
 
+  // Navigate to AddCita page
+  const handleAddCita = () => {
+    navigation.navigate('AddCita');
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -148,6 +160,9 @@ export default function Citas() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Mis Citas</Text>
+        <TouchableOpacity onPress={handleAddCita} style={styles.addButton}>
+          <Ionicons name="add" size={28} color="#C31F39" />
+        </TouchableOpacity>
       </View>
 
       {citas.length === 0 ? (
@@ -229,7 +244,9 @@ const styles = StyleSheet.create({
     color: '#1e1e1e',
   },
   addButton: {
-    padding: 4,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(195, 31, 57, 0.1)',
   },
   loadingText: {
     marginTop: 10,
