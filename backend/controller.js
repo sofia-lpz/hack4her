@@ -27,6 +27,42 @@ export const chat = async (req, res) => {
   }
 };
 
+export const summarizeFeedback = async (req, res) => {
+  try {
+    const store_id = req.params.store_id;
+
+    if (!store_id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Store ID is required'
+      });
+    }
+
+    const store = await service.getStores({ id: store_id });
+    if (!store || store.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Store not found'
+      });
+    }
+
+    const feedback = await service.getFeedback({ store_id: store_id });
+
+    const feedbackSummary = await chatbot.summarizeFeedback(feedback, store[0].nombre);
+
+    return res.status(200).json({
+      success: true,
+      data: feedbackSummary
+    });
+  } catch (error) {
+    console.error('Error in summarizeFeedback endpoint:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'An error occurred while summarizing feedback'
+    });
+  }
+}
+
 export const getUsers = async (req, res) => {
   try {
     const { filter } = req.query;
@@ -119,7 +155,14 @@ export const login = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: user
+      data: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        role: user.role,  // Explicitly include the role in the response
+      }
     });
   } catch (error) {
     console.error('Error in login endpoint:', error);

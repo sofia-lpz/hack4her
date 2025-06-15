@@ -1,5 +1,6 @@
 import express from 'express'
 import * as controller from './controller.js'
+import { s } from 'framer-motion/client';
 
 const router = express.Router();
 
@@ -16,10 +17,9 @@ router.post("/chat", controller.chat);
 router.post("/login", controller.login);
 router.post("/register", controller.register);
 
-//specialized by user
-
-//router.get("/userappointments/:userId", controller.getUserAppointments);
-//router.get("/userfeedback/:userId", controller.getUserFeedback);
-
+//specialized
+// ...existing code...
+router.get("/summarized_feedback/:store_id", controller.summarizeFeedback);
+// ...existing code...
 
 export { router }

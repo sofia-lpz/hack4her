@@ -94,6 +94,17 @@ async function chat(prompt) {
     return response;
 }
 
+async function summarizeFeedback(feedback, store_name) {
+    const prompt = `
+You are an expert in summarizing customer feedback for retail stores. Your task is to analyze the provided feedback and generate a concise summary that highlights key themes, sentiments, and any actionable insights.
+The summary should be in the format of three clear, brief sentences, do not add formatting or bullet points, just plain text.
+The feedback for ${store_name} is as follows:
+${JSON.stringify(feedback, null, 2)}
+`;
+    const response = await chatHelper(prompt);
+    return response;
+}
+
 async function chatHelper(prompt) {
     const response = await fetch(OPEN_AI_URL, {
         method: 'POST',
@@ -122,4 +133,4 @@ async function chatHelper(prompt) {
     return data.choices[0].message.content;
 }
 
-export { chat };
+export { chat, summarizeFeedback};

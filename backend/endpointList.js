@@ -18,8 +18,6 @@ const endpoints = [
     description: "Get store information with optional filtering",
     column: [
       { name: "id", type: "number" },
-      { name: "longitude", type: "decimal" },
-      { name: "latitude", type: "decimal" },
       { name: "nombre", type: "string" },
       { name: "nps", type: "decimal" },
       { name: "fillfoundrate", type: "decimal" },
