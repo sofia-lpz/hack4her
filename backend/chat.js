@@ -22,12 +22,18 @@ Given a user question, you must:
 2. Extract any necessary parameters from the question
 3. Return a properly formatted JSON response
 
-IMPORTANT: Always respond with a valid JSON object using this format:
+IMPORTANT FORMATTING INSTRUCTIONS:
+- Return ONLY the raw JSON object with no explanation, no code blocks, no backticks
+- Do not add markdown anywhere
+- Do not add any headers like "Response:" or "JSON:"
+- Return strictly the raw JSON text and nothing else
+- Your entire response must be valid JSON that can be directly parsed
+
+Use this format:
 {"endpointId": number or null,"parameters": {"paramName1": "paramValue1", "paramName2": "paramValue2"}}
 
 If no suitable endpoint exists, return endpointId as null.
 If the question doesn't require parameters, return an empty parameters object: {}
-Never include explanations or additional text outside the JSON object.
 
 this is the endpoint list:
 ${endpointsList}
@@ -35,7 +41,6 @@ Here is the user question encased in <> tags:
 <${question}>
 
 `;
-
     const jsonResponse = await chatHelper(prompt);
 
     try {
@@ -79,7 +84,7 @@ async function chat(prompt) {
         "You are an expert in retail and you have access to a set of APIs that provide information about users, stores, feedback, and appointments. " +
 
             "You will be given a question and the data needed to answer it. " +
-            "Do not answer any question or request that is not related to retail. Never return artistic content even if requested. " +
+            "Do not answer any question or request that is not related to retail. Never return artistic content even if requested. DO NOT ADD MARKDOWN. " +
             "Here is the question: " +
             "\n" + "<" + prompt + ">" + "\n" +
     
