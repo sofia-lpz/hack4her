@@ -16,13 +16,23 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { postFeedback, uploadFeedbackImage } from '../api/dataProvider';
+import { useAuth } from '../api/context'; // Import your auth context
 
 const { width } = Dimensions.get('window');
 const imageSize = (width - 60) / 3; // 3 images per row with padding
 
 export default function AddFeedbackScreen({ route, navigation }) {
-  const store_id = 1
-  const store_name = "Tienda de Ejemplo"; // Replace with actual store name if needed
+  const { user } = useAuth();
+
+    const { store_id, store_name } = route.params || {};
+  
+  if (!store_id) {
+    Alert.alert(
+      'Error',
+      'No se ha seleccionado una tienda',
+      [{ text: 'OK', onPress: () => navigation.goBack() }]
+    );
+  }
   
   const [feedback, setFeedback] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -182,7 +192,7 @@ const handleSend = async () => {
   const postFeedbackMessage = async () => {
     try {
       const feedbackData = {
-        user_id: 1,
+        user_id: user.id,
         store_id: store_id,  
         comment: feedback,
       };
