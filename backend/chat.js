@@ -3,9 +3,8 @@ import { endpoints, endpointsList } from './endpointList.js';
 import fetch from 'node-fetch';
 import * as service from './service.js'
 
-const OPEN_AI_KEY=
-const OPEN_AI_URL = process.env.OPENAI_API_URL || "https://api.openai.com/v1/chat/completions";
-const OPEN_AI_MODEL = process.env.OPENAI_MODEL || "gpt-3.5-turbo";
+const GEMINI_API_KEY = "";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent";
 
 const today = new Date();
 const currentDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
@@ -106,31 +105,36 @@ ${JSON.stringify(feedback, null, 2)}
 }
 
 async function chatHelper(prompt) {
-    const response = await fetch(OPEN_AI_URL, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPEN_AI_KEY}`,
         },
         body: JSON.stringify({
-            model: OPEN_AI_MODEL,
-            messages: [{
-                role: 'user',
-                content: prompt
+            contents: [{
+                role: "user",
+                parts: [{
+                    text: prompt
+                }]
             }],
-            max_tokens: 1000,
-            temperature: 0.7,
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 1000,
+            }
         }),
     });
 
     if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.statusText}`);
+        throw new Error(`Gemini API error: ${response.statusText}`);
     }
 
     const data = await response.json();
     console.log("prompt: ", prompt);
-    console.log("OpenAI response: ", data.choices[0].message.content);
-    return data.choices[0].message.content;
+    
+    // Extract response from Gemini API format
+    const responseText = data.candidates[0].content.parts[0].text;
+    console.log("Gemini response: ", responseText);
+    return responseText;
 }
 
 export { chat, summarizeFeedback};
