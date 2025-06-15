@@ -2,7 +2,7 @@ import axios from 'axios';
 const API_BASE_URL = 'http://10.22.138.54:8080/api';
 const SERVER_URL = 'http://10.22.138.54:8080/'
 const API_BASE_URL_SUPABASE = 'https://kjsganrpfhivqpruovrg.supabase.co/rest/v1/';
-const API_KEY = 'your_api_key_here';
+const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtqc2dhbnJwZmhpdnFwcnVvdnJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3NDE1MzUsImV4cCI6MjA2NTMxNzUzNX0.FQK_hfvs72VdHhvuAOtto3oBG4QyR3IsuwFYWGVkoGU';
 
 
 export const fetchChat = async (prompt) => {

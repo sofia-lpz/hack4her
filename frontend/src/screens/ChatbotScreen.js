@@ -76,12 +76,6 @@ export default function ChatbotScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={90}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.link}>← Atrás</Text>
-        <Text style={styles.title}>Chatbot</Text>
-        <Text style={styles.link}>Ayuda</Text>
-      </View>
 
       {/* Bot icon */}
       <View style={styles.iconContainer}>
@@ -138,15 +132,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  header: {
-    paddingTop: 50,
-    paddingBottom: 10,
-    paddingHorizontal: 20,
-    borderBottomWidth: 2,
-    borderColor: '#d91c34',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
   },
   title: {
     fontWeight: 'bold',

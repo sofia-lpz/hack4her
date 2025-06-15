@@ -135,16 +135,6 @@ export default function AdminPanel({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.link}>← Atrás</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Panel Admin</Text>
-        <TouchableOpacity onPress={refreshData}>
-          <Ionicons name="refresh" size={20} color="#d91c34" />
-        </TouchableOpacity>
-      </View>
 
       {isLoading ? (
         <View style={styles.loadingContainer}>
