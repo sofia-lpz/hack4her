@@ -24,6 +24,16 @@ export const login = async (username, password) => {
   }
 }
 
+export const fetchStats = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/stats`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    throw error;
+  }
+}
+
 //users
 export const fetchUsers = async () => {
   try {
@@ -79,6 +89,16 @@ export const fetchStoreById = async (storeId) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching store by ID:', error);
+    throw error;
+  }
+}
+export const fetchLeastVisitedStores = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/least_visited_stores`, {
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching least visited stores:', error);
     throw error;
   }
 }

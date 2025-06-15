@@ -201,3 +201,37 @@ export const register = async (req, res) => {
     });
   }
 }
+
+export const getLeastVisitedStores = async (req, res) => {
+  try {
+    const stores = await service.getLeastVisitedStores();
+
+    return res.status(200).json({
+      success: true,
+      data: stores
+    });
+  } catch (error) {
+    console.error('Error in getLeastVisitedStores endpoint:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'An error occurred while fetching least visited stores'
+    });
+  }
+}
+
+export const getStats = async (req, res) => {
+  try {
+    const stats = await service.getStats();
+
+    return res.status(200).json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    console.error('Error in getStats endpoint:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'An error occurred while fetching statistics'
+    });
+  }
+}

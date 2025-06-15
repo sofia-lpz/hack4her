@@ -316,7 +316,6 @@ export async function getCitas(filter = {}) {
   }
 }
 
-
 export async function login(username, password) {
   const client = await pool.connect();
   try {
@@ -377,6 +376,156 @@ export async function register(userData) {
   }
   catch (error) {
     console.error('Error in register:', error);
+    throw error;
+  }
+  finally {
+    client.release();
+    console.log('Connection released successfully');
+  }
+}
+
+export async function getLeastVisitedStores() {
+  // get the data of the least visited stores in the last 30 days and times they were visited
+  const client = await pool.connect();
+  try {
+    const query = `
+      SELECT s.id, s.nombre, COUNT(c.id) AS visit_count
+      FROM stores s
+      LEFT JOIN citas c ON s.id = c.store_id 
+        AND c.date >= NOW() - INTERVAL '30 days'
+      GROUP BY s.id, s.nombre
+      ORDER BY visit_count ASC
+      LIMIT 5;`;
+    const result = await client.query(query);
+    console.log(`${result.rows.length} least visited stores returned`);
+    return result.rows;
+  }
+  catch (error) {
+    console.error('Error in getLeastVisitedStores:', error);
+    throw error;
+  }
+  finally {
+    client.release();
+    console.log('Connection released successfully');
+  }
+}
+
+export async function getCitasCount() {
+  // Get the total number of appointments in the last 30 day
+  const client = await pool.connect();
+  try {
+    const query = `
+      SELECT COUNT(*) AS total_citas
+      FROM citas
+      WHERE date >= NOW() - INTERVAL '30 days';`;
+    const result = await client.query(query);
+    console.log('Total number of citas in the last 30 days:', result.rows[0].total_citas);
+    return result.rows[0].total_citas;
+  }
+  catch (error) {
+    console.error('Error in getNumberOfCitas:', error);
+    throw error;
+  }
+  finally {
+    client.release();
+    console.log('Connection released successfully');
+  }
+}
+
+export async function getWorstStores() {
+  // Get the number of stores with NPS lower than 30
+  const client = await pool.connect();
+  try {
+    const query = `
+      SELECT COUNT(*) AS total_worst_stores
+      FROM stores
+      WHERE nps < 0;`;
+    const result = await client.query(query);
+    return result.rows[0].total_worst_stores;
+  }
+  catch (error) {
+    console.error('Error in getWorstStores:', error);
+    throw error;
+  }
+  finally {
+    client.release();
+    console.log('Connection released successfully');
+  }
+}
+
+export async function getBestStores() {
+  // Get the number of stores with NPS higher than 70
+  const client = await pool.connect();
+  try {
+    const query = `
+      SELECT COUNT(*) AS total_best_stores
+      FROM stores
+      WHERE nps > 50;`;
+    const result = await client.query(query);
+    return result.rows[0].total_best_stores;
+  }
+  catch (error) {
+    console.error('Error in getBestStores:', error);
+    throw error;
+  }
+  finally {
+    client.release();
+    console.log('Connection released successfully');
+  }
+}
+
+export async function getAverageNPS() {
+  // Get the average NPS of all stores
+  const client = await pool.connect();
+  try {
+    const query = `
+      SELECT AVG(nps) AS average_nps
+      FROM stores;`;
+    const result = await client.query(query);
+    return result.rows[0].average_nps;
+  }
+  catch (error) {
+    console.error('Error in getAverageNPS:', error);
+    throw error;
+  }
+  finally {
+    client.release();
+    console.log('Connection released successfully');
+  }
+}
+
+export async function getAverageFillFoundRate() {
+  // Get the average fill found rate of all stores
+  const client = await pool.connect();
+  try {
+    const query = `
+      SELECT AVG(fillfoundrate) AS average_fill_found_rate
+      FROM stores;`;
+    const result = await client.query(query);
+    return result.rows[0].average_fill_found_rate;
+  }
+  catch (error) {
+    console.error('Error in getAverageFillFoundRate:', error);
+    throw error;
+  }
+  finally {
+    client.release();
+    console.log('Connection released successfully');
+  }
+}
+
+export async function getAverageDamageRate() {
+  // Get the average damage rate of all stores
+  const client = await pool.connect();
+  try {
+    const query = `
+      SELECT AVG(damage_rate) AS average_damage_rate
+      FROM stores;`;
+    const result = await client.query(query);
+    return result.rows[0].average_damage_rate;
+  }
+  catch (error) {
+    console.error('Error in getAverageDamageRate:', error);
     throw error;
   }
   finally {

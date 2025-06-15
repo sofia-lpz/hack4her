@@ -59,3 +59,35 @@ export const register = async (userData) => {
     throw err; // Re-throw to allow proper error handling in controller
   }
 }
+
+export const getLeastVisitedStores = async () => {
+  try {
+    const stores = await mysql.getLeastVisitedStores();
+    return stores;
+  } catch (err) {
+    console.error(err);
+    throw err; // Re-throw to allow proper error handling in controller
+  }
+}
+
+//export const getNegativePositiveFeedbackRatio = async () => {
+
+export const getStats = async () => {
+  try {
+    const average_fill_found_rate = await mysql.getAverageFillFoundRate();
+    const average_damage_rate = await mysql.getAverageDamageRate();
+    const averageNPS = await mysql.getAverageNPS();
+    const citasCount = await mysql.getCitasCount();
+
+    const stats = {
+      average_fill_found_rate: Number(average_fill_found_rate).toFixed(1),
+      average_damage_rate: Number(average_damage_rate).toFixed(1),
+      averageNPS: Number(averageNPS).toFixed(1),
+      citasCount: citasCount
+    };
+    return stats;
+  } catch (err) {
+    console.error(err);
+    throw err; // Re-throw to allow proper error handling in controller
+  }
+}
