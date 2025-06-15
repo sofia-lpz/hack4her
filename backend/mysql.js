@@ -32,7 +32,7 @@ pool.on('error', (err, client) => {
 export async function getUsers(filter = {}) {
   const client = await pool.connect();
   try {
-    let query = 'SELECT * FROM users';
+    let query = 'SELECT id, username, first_name, last_name, email, role FROM users';
     let params = [];
     let paramIndex = 1;
     
@@ -81,7 +81,7 @@ export async function getUsers(filter = {}) {
 export async function getStores(filter = {}) {
   const client = await pool.connect();
   try {
-    let query = 'SELECT * FROM stores';
+let query = 'SELECT id, nombre, nps, fillfoundrate, damage_rate, out_of_stock, complaint_resolution_time_hrs FROM stores';
     let params = [];
     let paramIndex = 1;
     
@@ -109,20 +109,6 @@ export async function getStores(filter = {}) {
       params.push(filter.nps_max);
     }
     
-    // Location-based filtering using PostgreSQL's built-in functions
-    if (filter.latitude && filter.longitude && filter.radius) {
-      // Using Haversine formula calculation optimized for transaction pooler
-      whereConditions.push(`
-        (6371 * acos(
-          cos(radians($${paramIndex++})) * 
-          cos(radians(latitude)) * 
-          cos(radians(longitude) - radians($${paramIndex++})) + 
-          sin(radians($${paramIndex++})) * 
-          sin(radians(latitude))
-        )) <= $${paramIndex++}`);
-      params.push(filter.latitude, filter.longitude, filter.latitude, filter.radius);
-    }
-    
     if (whereConditions.length > 0) {
       query += ' WHERE ' + whereConditions.join(' AND ');
     }
@@ -145,7 +131,7 @@ export async function getStores(filter = {}) {
 export async function getFeedback(filter = {}) {
   const client = await pool.connect();
   try {
-    let query = 'SELECT * FROM feedback';
+     let query = 'SELECT id, user_id, store_id, comment, created_at, image_path FROM feedback';
     let params = [];
     let paramIndex = 1;
     
@@ -216,7 +202,7 @@ export async function getCitas(filter = {}) {
   try {
     // Modified query to include JOIN with users table through citas_to_users
     let query = `
-      SELECT c.*, 
+      SELECT c.id, c.store_id, c.date, c.time, c.confirmada, c.cancelada, 
              u.id AS user_id, 
              u.username, 
              u.first_name, 
@@ -344,8 +330,9 @@ export async function login(username, password) {
       return null; // No user found
     }
 
-    console.log('Login successful for user:', result.rows[0].username);
-    return result.rows[0]; // Return the user object
+    // Log the successful login including role
+    console.log('Login successful for user:', result.rows[0].username, 'with role:', result.rows[0].role);
+    return result.rows[0]; // Return the user object (including role)
   }
   catch (error) {
     console.error('Error in login:', error);
