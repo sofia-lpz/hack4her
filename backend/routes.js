@@ -8,6 +8,12 @@ router.get("/stores", controller.getStores);
 router.get("/feedback", controller.getFeedback);
 router.get("/citas", controller.getCitas);
 
+//specialized by user
+
+//router.get("/userappointments/:userId", controller.getUserAppointments);
+//router.get("/userfeedback/:userId", controller.getUserFeedback);
+
+
 
 router.post("/chat", controller.chat);
 

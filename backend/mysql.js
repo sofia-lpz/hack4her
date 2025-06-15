@@ -216,7 +216,19 @@ async function getFeedback(filter = {}) {
 async function getCitas(filter = {}) {
   const client = await pool.connect();
   try {
-    let query = 'SELECT * FROM citas';
+    // Modified query to include JOIN with users table through citas_to_users
+    let query = `
+      SELECT c.*, 
+             u.id AS user_id, 
+             u.username, 
+             u.first_name, 
+             u.last_name, 
+             u.email, 
+             u.role
+      FROM citas c
+      LEFT JOIN citas_to_users cu ON c.id = cu.cita_id
+      LEFT JOIN users u ON cu.user_id = u.id`;
+    
     let params = [];
     let paramIndex = 1;
     
@@ -224,38 +236,43 @@ async function getCitas(filter = {}) {
     const whereConditions = [];
     
     if (filter.id) {
-      whereConditions.push(`id = $${paramIndex++}`);
+      whereConditions.push(`c.id = $${paramIndex++}`);
       params.push(filter.id);
     }
     
     if (filter.store_id) {
-      whereConditions.push(`store_id = $${paramIndex++}`);
+      whereConditions.push(`c.store_id = $${paramIndex++}`);
       params.push(filter.store_id);
     }
     
     if (filter.date) {
-      whereConditions.push(`date = $${paramIndex++}`);
+      whereConditions.push(`c.date = $${paramIndex++}`);
       params.push(filter.date);
     }
     
     if (filter.confirmed !== undefined) {
-      whereConditions.push(`confirmada = $${paramIndex++}`);
+      whereConditions.push(`c.confirmada = $${paramIndex++}`);
       params.push(filter.confirmed);
     }
     
     if (filter.cancelled !== undefined) {
-      whereConditions.push(`cancelada = $${paramIndex++}`);
+      whereConditions.push(`c.cancelada = $${paramIndex++}`);
       params.push(filter.cancelled);
     }
     
     if (filter.date_from) {
-      whereConditions.push(`date >= $${paramIndex++}`);
+      whereConditions.push(`c.date >= $${paramIndex++}`);
       params.push(filter.date_from);
     }
     
     if (filter.date_to) {
-      whereConditions.push(`date <= $${paramIndex++}`);
+      whereConditions.push(`c.date <= $${paramIndex++}`);
       params.push(filter.date_to);
+    }
+    
+    if (filter.user_id) {
+      whereConditions.push(`u.id = $${paramIndex++}`);
+      params.push(filter.user_id);
     }
     
     if (whereConditions.length > 0) {
@@ -263,12 +280,47 @@ async function getCitas(filter = {}) {
     }
 
     // Add ORDER BY
-    query += ' ORDER BY date, time';
+    query += ' ORDER BY c.date, c.time';
 
     const result = await client.query(query, params);
+    
+    // Group the results by cita to handle multiple users per appointment
+    const citasMap = new Map();
+    
+    for (const row of result.rows) {
+      const citaId = row.id;
+      
+      if (!citasMap.has(citaId)) {
+        // Initialize cita object with appointment data
+        citasMap.set(citaId, {
+          id: row.id,
+          store_id: row.store_id,
+          date: row.date,
+          time: row.time,
+          confirmada: row.confirmada,
+          cancelada: row.cancelada,
+          users: []
+        });
+      }
+      
+      // Add user to the cita if user data exists
+      if (row.user_id) {
+        citasMap.get(citaId).users.push({
+          id: row.user_id,
+          username: row.username,
+          first_name: row.first_name,
+          last_name: row.last_name,
+          email: row.email,
+          role: row.role
+        });
+      }
+    }
+    
+    // Convert map to array
+    const citas = Array.from(citasMap.values());
 
-    console.log(`${result.rows.length} citas returned`);
-    return result.rows;
+    console.log(`${citas.length} citas returned with user data`);
+    return citas;
   }
   catch (error) {
     console.error('Error in getCitas:', error);
