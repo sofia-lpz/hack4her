@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { login } from '../api/dataProvider';
+import { useAuth } from '../api/authContext'; // <-- asegúrate que existe y esté configurado
+
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -20,54 +22,51 @@ export default function LoginScreen({ navigation }) {
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { login: setUserContext } = useAuth();
 
   const handleLogin = async () => {
-    // Basic validation
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Por favor ingresa tu correo y contraseña');
-      return;
+  if (!email.trim() || !password.trim()) {
+    Alert.alert('Error', 'Por favor ingresa tu correo y contraseña');
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const userData = await login(email, password); // <-- tu función API
+    
+    console.log('Login successful:', userData);
+
+    // Validar que venga el rol desde backend
+    if (userData?.data?.role === 'admin' || userData?.data?.role === 'user') {
+      setUserContext(userData.data); 
+    } else {
+      Alert.alert('Error', 'Rol no reconocido.');
     }
 
-    setIsLoading(true);
+  } catch (error) {
+    console.error('Login error:', error);
 
-    try {
-      // Call the login API
-      const userData = await login(email, password);
-      
-      console.log('Login successful:', userData);
-      
-      /*
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Home' }],
-      });
-      */
-      
-    } catch (error) {
-      console.error('Login error:', error);
-      
-      // Handle different types of errors
-      let errorMessage = 'Error al iniciar sesión. Intenta de nuevo.';
-      
-      if (error.response) {
-        // Server responded with error status
-        if (error.response.status === 401) {
-          errorMessage = 'Credenciales incorrectas. Verifica tu correo y contraseña.';
-        } else if (error.response.status === 404) {
-          errorMessage = 'Usuario no encontrado.';
-        } else if (error.response.status >= 500) {
-          errorMessage = 'Error del servidor. Intenta más tarde.';
-        }
-      } else if (error.request) {
-        // Network error
-        errorMessage = 'Error de conexión. Verifica tu internet.';
+    let errorMessage = 'Error al iniciar sesión. Intenta de nuevo.';
+
+    if (error.response) {
+      if (error.response.status === 401) {
+        errorMessage = 'Credenciales incorrectas.';
+      } else if (error.response.status === 404) {
+        errorMessage = 'Usuario no encontrado.';
+      } else if (error.response.status >= 500) {
+        errorMessage = 'Error del servidor. Intenta más tarde.';
       }
-      
-      Alert.alert('Error de inicio de sesión', errorMessage);
-    } finally {
-      setIsLoading(false);
+    } else if (error.request) {
+      errorMessage = 'Error de conexión.';
     }
-  };
+
+    Alert.alert('Error de inicio de sesión', errorMessage);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <KeyboardAvoidingView
