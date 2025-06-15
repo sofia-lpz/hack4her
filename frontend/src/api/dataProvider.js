@@ -128,6 +128,15 @@ export const fetchFeedbackById = async (feedbackId) => {
     throw error;
   }
 }
+export const fetchFeedbackSummary = async (storeId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL_SUPABASE}summarized_feedback/${storeId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching feedback summary:', error);
+    throw error;
+  }
+}
 
 //citas
 export const fetchCitas = async () => {

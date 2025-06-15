@@ -1,17 +1,72 @@
 import React, { useState } from 'react';
-import {View,Text,TextInput,StyleSheet,TouchableOpacity,Image,KeyboardAvoidingView,Platform,} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { login } from '../api/dataProvider';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    // Conexión al backend
-    console.log({ email, password });
-    // navegación o error aquí
+  const handleLogin = async () => {
+    // Basic validation
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Error', 'Por favor ingresa tu correo y contraseña');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Call the login API
+      const userData = await login(email, password);
+      
+      console.log('Login successful:', userData);
+      
+      /*
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+      */
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      // Handle different types of errors
+      let errorMessage = 'Error al iniciar sesión. Intenta de nuevo.';
+      
+      if (error.response) {
+        // Server responded with error status
+        if (error.response.status === 401) {
+          errorMessage = 'Credenciales incorrectas. Verifica tu correo y contraseña.';
+        } else if (error.response.status === 404) {
+          errorMessage = 'Usuario no encontrado.';
+        } else if (error.response.status >= 500) {
+          errorMessage = 'Error del servidor. Intenta más tarde.';
+        }
+      } else if (error.request) {
+        // Network error
+        errorMessage = 'Error de conexión. Verifica tu internet.';
+      }
+      
+      Alert.alert('Error de inicio de sesión', errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -19,7 +74,6 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-
       {/* Contenedor centrado */}
       <View style={styles.centeredContent}>
         {/* Logo */}
@@ -28,11 +82,11 @@ export default function LoginScreen({ navigation }) {
           style={styles.logo}
           resizeMode="contain"
         />
-
+        
         {/* Título */}
         <Text style={styles.title}>Ingresa a tu cuenta</Text>
         <Text style={styles.subtitle}>Ingresa tu usuario y contraseña para acceder</Text>
-
+        
         {/* Inputs */}
         <TextInput
           placeholder="Correo electrónico"
@@ -41,7 +95,9 @@ export default function LoginScreen({ navigation }) {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          editable={!isLoading}
         />
+        
         <View style={styles.passwordContainer}>
           <TextInput
             placeholder="Contraseña"
@@ -49,6 +105,7 @@ export default function LoginScreen({ navigation }) {
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
+            editable={!isLoading}
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Ionicons
@@ -58,10 +115,18 @@ export default function LoginScreen({ navigation }) {
             />
           </TouchableOpacity>
         </View>
-
+        
         {/* Botón Login */}
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Log In</Text>
+        <TouchableOpacity 
+          style={[styles.button, isLoading && styles.buttonDisabled]} 
+          onPress={handleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.buttonText}>Log In</Text>
+          )}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -126,6 +191,9 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     elevation: 2,
+  },
+  buttonDisabled: {
+    backgroundColor: '#ccc',
   },
   buttonText: {
     color: '#fff',

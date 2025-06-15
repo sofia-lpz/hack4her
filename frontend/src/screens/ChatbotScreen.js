@@ -7,7 +7,7 @@ import { fetchChat } from '../api/dataProvider';
 export default function ChatbotScreen() {
   const [message, setMessage] = useState('');
   const [chatMessages, setChatMessages] = useState([
-    { text: 'Hola, ¿en qué te ayudo?', isUser: false },
+    { text: 'Hi, ¿What can i help you with?', isUser: false },
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollViewRef = useRef();
