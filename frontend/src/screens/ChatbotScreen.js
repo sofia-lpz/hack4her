@@ -1,9 +1,74 @@
-import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
+import { fetchChat } from '../api/dataProvider';
 
 export default function ChatbotScreen() {
   const [message, setMessage] = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    { text: 'Hola, ¿en qué te ayudo?', isUser: false },
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+  const scrollViewRef = useRef();
+
+  const handleSend = async () => {
+    if (!message.trim()) return;
+    
+    const userMessage = message;
+    setMessage('');
+    
+    // Add user message to chat
+    setChatMessages(prevMessages => [
+      ...prevMessages,
+      { text: userMessage, isUser: true }
+    ]);
+    
+    // Scroll to bottom
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+    
+    try {
+      setIsLoading(true);
+      // Call API with user message
+      const apiResponse = await fetchChat(userMessage);
+      
+      // Handle the new response format
+      let botMessage = 'Lo siento, hubo un problema. Intenta de nuevo.';
+      console.log('API Response:', apiResponse);
+      
+      if (apiResponse && apiResponse.success) {
+        // Extract message from the response field
+        botMessage = apiResponse.response || botMessage;
+      } else if (apiResponse && apiResponse.response) {
+        // Fallback to response field even if success is false
+        botMessage = apiResponse.response;
+      } else if (apiResponse && apiResponse.message) {
+        // Fallback to old message field format
+        botMessage = apiResponse.message;
+      }
+      
+      // Add bot response to chat
+      setChatMessages(prevMessages => [
+        ...prevMessages,
+        { text: botMessage, isUser: false }
+      ]);
+    } catch (error) {
+      console.error('Chat API error:', error);
+      // Add error message
+      setChatMessages(prevMessages => [
+        ...prevMessages,
+        { text: 'Lo siento, hubo un problema con la conexión. Intenta de nuevo más tarde.', isUser: false }
+      ]);
+    } finally {
+      setIsLoading(false);
+      // Scroll to bottom again after response
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -24,10 +89,27 @@ export default function ChatbotScreen() {
       </View>
 
       {/* Chat messages */}
-      <ScrollView style={styles.messages} contentContainerStyle={{ paddingBottom: 100 }}>
-        <View style={styles.bubbleLeft}><Text style={styles.bubbleLeftText}>Hola, ¿en qué te ayudo?</Text></View>
-        <View style={styles.bubbleRight}><Text style={styles.bubbleRightText}>¿Dónde está el hospital?</Text></View>
-        <View style={styles.bubbleLeft}><Text style={styles.bubbleLeftText}>Puedes encontrarlo en el mapa.</Text></View>
+      <ScrollView 
+        style={styles.messages} 
+        contentContainerStyle={{ paddingBottom: 20 }}
+        ref={scrollViewRef}
+        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+      >
+        {chatMessages.map((msg, index) => (
+          <View 
+            key={index} 
+            style={msg.isUser ? styles.bubbleRight : styles.bubbleLeft}
+          >
+            <Text style={msg.isUser ? styles.bubbleRightText : styles.bubbleLeftText}>
+              {msg.text}
+            </Text>
+          </View>
+        ))}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="#C31F39" />
+          </View>
+        )}
       </ScrollView>
 
       {/* Input */}
@@ -38,8 +120,13 @@ export default function ChatbotScreen() {
           value={message}
           onChangeText={setMessage}
           style={styles.input}
+          onSubmitEditing={handleSend}
         />
-        <TouchableOpacity style={styles.sendButton}>
+        <TouchableOpacity 
+          style={styles.sendButton} 
+          onPress={handleSend}
+          disabled={isLoading || !message.trim()}
+        >
           <Ionicons name="send" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -122,5 +209,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#C31F39',
     padding: 10,
     borderRadius: 20,
+  },
+  loadingContainer: {
+    padding: 10,
+    alignItems: 'center',
   },
 });
