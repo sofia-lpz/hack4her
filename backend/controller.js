@@ -96,3 +96,62 @@ export const getCitas = async (req, res) => {
     });
   }
 };
+
+export const login = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Username and password are required'
+      });
+    }
+
+    const user = await service.login(username, password);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid username or password'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    console.error('Error in login endpoint:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'An error occurred while processing your request'
+    });
+  }
+}
+
+export const register = async (req, res) => {
+  try {
+    const userData = req.body;
+
+    if (!userData || !userData.username || !userData.password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Username and password are required'
+      });
+    }
+
+    const newUser = await service.register(userData);
+
+    return res.status(201).json({
+      success: true,
+      data: newUser
+    });
+  } catch (error) {
+    console.error('Error in register endpoint:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'An error occurred while processing your request'
+    });
+  }
+}

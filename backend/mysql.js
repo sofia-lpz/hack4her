@@ -16,13 +16,11 @@ const pool = new Pool({
     rejectUnauthorized: false // Required for Supabase
   },
   
-  // Additional options for better performance with transaction pooler
   allowExitOnIdle: true, // Allow pool to close when idle
   statement_timeout: 30000, // 30 second statement timeout
   query_timeout: 30000, // 30 second query timeout
 });
 
-// Pool event listeners for monitoring
 pool.on('connect', (client) => {
   console.log('New client connected to transaction pooler');
 });
@@ -31,7 +29,7 @@ pool.on('error', (err, client) => {
   console.error('Unexpected error on idle client', err);
 });
 
-async function getUsers(filter = {}) {
+export async function getUsers(filter = {}) {
   const client = await pool.connect();
   try {
     let query = 'SELECT * FROM users';
@@ -80,7 +78,7 @@ async function getUsers(filter = {}) {
   }
 }
 
-async function getStores(filter = {}) {
+export async function getStores(filter = {}) {
   const client = await pool.connect();
   try {
     let query = 'SELECT * FROM stores';
@@ -144,7 +142,7 @@ async function getStores(filter = {}) {
   }
 }
 
-async function getFeedback(filter = {}) {
+export async function getFeedback(filter = {}) {
   const client = await pool.connect();
   try {
     let query = 'SELECT * FROM feedback';
@@ -213,7 +211,7 @@ async function getFeedback(filter = {}) {
   }
 }
 
-async function getCitas(filter = {}) {
+export async function getCitas(filter = {}) {
   const client = await pool.connect();
   try {
     // Modified query to include JOIN with users table through citas_to_users
@@ -332,8 +330,76 @@ async function getCitas(filter = {}) {
   }
 }
 
+
+export async function login(username, password) {
+  const client = await pool.connect();
+  try {
+    const query = 'SELECT * FROM users WHERE username = $1 AND password = $2';
+    const params = [username, password];
+
+    const result = await client.query(query, params);
+
+    if (result.rows.length === 0) {
+      console.log('Login failed: Invalid username or password');
+      return null; // No user found
+    }
+
+    console.log('Login successful for user:', result.rows[0].username);
+    return result.rows[0]; // Return the user object
+  }
+  catch (error) {
+    console.error('Error in login:', error);
+    throw error;
+  }
+  finally {
+    client.release();
+    console.log('Connection released successfully');
+  }
+}
+
+export async function register(userData) {
+  const client = await pool.connect();
+  try {
+    const { username, password, email, first_name, last_name, role } = userData;
+
+    // Validate required fields
+    if (!username || !password || !email) {
+      throw new Error('Username, password, and email are required');
+    }
+
+    // Check if user already exists
+    const checkQuery = 'SELECT * FROM users WHERE username = $1 OR email = $2';
+    const checkParams = [username, email];
+    const checkResult = await client.query(checkQuery, checkParams);
+
+    if (checkResult.rows.length > 0) {
+      throw new Error('User with this username or email already exists');
+    }
+
+    // Insert new user
+    const insertQuery = `
+      INSERT INTO users (username, password, email, first_name, last_name, role)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *`;
+    const insertParams = [username, password, email, first_name || '', last_name || '', role || 'user'];
+
+    const result = await client.query(insertQuery, insertParams);
+
+    console.log('User registered successfully:', result.rows[0]);
+    return result.rows[0]; // Return the newly created user object
+  }
+  catch (error) {
+    console.error('Error in register:', error);
+    throw error;
+  }
+  finally {
+    client.release();
+    console.log('Connection released successfully');
+  }
+}
+
 // Health check function to test connection
-async function healthCheck() {
+export async function healthCheck() {
   const client = await pool.connect();
   try {
     const result = await client.query('SELECT NOW() as current_time');
@@ -371,10 +437,5 @@ process.on('SIGTERM', async () => {
 });
 
 export {
-  getUsers,
-  getStores,
-  getFeedback,
-  getCitas,
-  healthCheck,
   pool // Export pool in case you need direct access
 };

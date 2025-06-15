@@ -1,6 +1,6 @@
 import * as mysql from './mysql.js'
 
-const getUsers = async (filter = {}) => {
+export const getUsers = async (filter = {}) => {
   try {
     const users = await mysql.getUsers(filter);
     return users;
@@ -10,7 +10,7 @@ const getUsers = async (filter = {}) => {
   }
 }
 
-const getCitas = async (filter = {}) => {
+export const getCitas = async (filter = {}) => {
   try {
     const citas = await mysql.getCitas(filter);
     return citas;
@@ -20,7 +20,7 @@ const getCitas = async (filter = {}) => {
   }
 }
 
-const getStores = async (filter = {}) => {
+export const getStores = async (filter = {}) => {
   try {
     const stores = await mysql.getStores(filter);
     return stores;
@@ -30,7 +30,7 @@ const getStores = async (filter = {}) => {
   }
 } 
 
-const getFeedback = async (filter = {}) => {
+export const getFeedback = async (filter = {}) => {
   try {
     const feedback = await mysql.getFeedback(filter);
     return feedback;
@@ -40,10 +40,22 @@ const getFeedback = async (filter = {}) => {
   }
 }
 
-// Export individual functions directly
-export {
-  getUsers,
-  getCitas,
-  getStores,
-  getFeedback
-};
+export const login = async (username, password) => {
+  try {
+    const user = await mysql.login(username, password);
+    return user;
+  } catch (err) {
+    console.error(err);
+    throw err; // Re-throw to allow proper error handling in controller
+  }
+}
+
+export const register = async (userData) => {
+  try {
+    const newUser = await mysql.register(userData);
+    return newUser;
+  } catch (err) {
+    console.error(err);
+    throw err; // Re-throw to allow proper error handling in controller
+  }
+}
