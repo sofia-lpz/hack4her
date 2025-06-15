@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Linking } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -12,7 +12,7 @@ export default function Maps() {
 
   const handleMarkerPress = (feature) => {
     setSelectedFeature(feature);
-    bottomSheetRef.current?.expand();
+    bottomSheetRef.current?.snapToIndex(0);
   };
 
   const handleOpenMaps = () => {
@@ -46,29 +46,18 @@ export default function Maps() {
           ))}
         </MapView>
 
-        {/* Bottom Sheet con los campos del GeoJSON */}
         <BottomSheet
-          ref={bottomSheetRef}
-          index={-1}
-          snapPoints={['30%', '60%']}
-          enablePanDownToClose
-          backgroundComponent={() => (
-            <View style={{
-              backgroundColor: 'white',
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              flex: 1,
-            }} />
-          )}
-          handleIndicatorStyle={styles.sheetHandle}
-        >
-          <BottomSheetView style={{
-            backgroundColor: 'white',
-            padding: 20,
-            flex: 1,
-          }}>
+  ref={bottomSheetRef}
+  index={-1}
+  snapPoints={['15%', '40%']}
+  enablePanDownToClose
+  backgroundStyle={styles.sheetBackground}
+  handleStyle={styles.sheetHandleContainer} 
+  handleIndicatorStyle={styles.sheetHandle}
+>
+          <BottomSheetView style={styles.sheetContent}>
             {selectedFeature && (
-              <>
+              <ScrollView>
                 <View style={styles.sheetHeader}>
                   <Text style={styles.sheetTitle}>
                     {selectedFeature.properties.nombre || 'Nombre no disponible'}
@@ -97,9 +86,9 @@ export default function Maps() {
                   style={styles.navigationButton}
                   onPress={handleOpenMaps}
                 >
-                  <Text style={styles.navigationButtonText}> Cómo llegar</Text>
+                  <Text style={styles.navigationButtonText}>Cómo llegar</Text>
                 </TouchableOpacity>
-              </>
+              </ScrollView>
             )}
           </BottomSheetView>
         </BottomSheet>
@@ -108,7 +97,6 @@ export default function Maps() {
   );
 }
 
-// Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -116,28 +104,42 @@ const styles = StyleSheet.create({
   map: {
     ...StyleSheet.absoluteFillObject,
   },
+ 
+  sheetHandleContainer: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 10,
+  },
   sheetHandle: {
     backgroundColor: '#ccc',
     width: 40,
     height: 5,
     borderRadius: 3,
-    alignSelf: 'center',
-    marginTop: 10,
+  },
+  sheetContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    flex: 1,
+    borderRadius: 20,
   },
   sheetHeader: {
     marginBottom: 15,
+    minHeight: 40, 
   },
   sheetTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+    textAlign: 'left',
   },
   detailsContainer: {
-    marginBottom: 220,
+    marginBottom: 20,
+    paddingTop: 20, 
   },
   detailText: {
     fontSize: 16,
-    marginVertical: 4,
+    marginVertical: 6,
     color: '#555',
   },
   detailLabel: {
@@ -146,10 +148,16 @@ const styles = StyleSheet.create({
   },
   navigationButton: {
     backgroundColor: '#4285F4',
-    padding: 12,
-    borderRadius: 20,
+    padding: 15,
+    borderRadius: 25,
     alignItems: 'center',
     marginTop: 10,
+    marginHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   navigationButtonText: {
     color: 'white',

@@ -8,6 +8,7 @@ module.exports = function (api) {
       '@babel/plugin-transform-private-property-in-object',
       ['@babel/plugin-proposal-decorators', { legacy: true }],
       ['@babel/plugin-proposal-class-properties', { loose: true }],
+      ['react-native-reanimated/plugin'], 
     ],
   };
 };
