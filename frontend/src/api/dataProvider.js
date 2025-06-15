@@ -1,5 +1,6 @@
 import axios from 'axios';
 const API_BASE_URL = 'http://10.22.138.54:8080/api';
+const SERVER_URL = 'http://10.22.138.54:8080/'
 const API_BASE_URL_SUPABASE = 'https://kjsganrpfhivqpruovrg.supabase.co/rest/v1/';
 const API_KEY = 'your_api_key_here';
 
@@ -20,6 +21,16 @@ export const login = async (username, password) => {
     return response.data;
   } catch (error) {
     console.error('Error during login:', error);
+    throw error;
+  }
+}
+
+export const fetchStats = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/stats`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching stats:', error);
     throw error;
   }
 }
@@ -82,6 +93,16 @@ export const fetchStoreById = async (storeId) => {
     throw error;
   }
 }
+export const fetchLeastVisitedStores = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/least_visited_stores`, {
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching least visited stores:', error);
+    throw error;
+  }
+}
 
 //feedback
 export const fetchFeedback = async () => {
@@ -137,6 +158,39 @@ export const fetchFeedbackSummary = async (storeId) => {
     throw error;
   }
 }
+
+export const postFeedback = async (feedbackData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL_SUPABASE}feedback`, feedbackData, {
+      headers: supabaseHeaders
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error posting feedback:', error);
+    throw error;
+  }
+}
+
+export const uploadFeedbackImage = async (imageFile) => {
+  const formData = new FormData();
+  formData.append('image', {
+    uri: imageFile.uri,
+    type: 'image/jpeg',
+    name: imageFile.filename || 'image.jpg'
+  });
+
+  try {
+    const response = await axios.post(`${SERVER_URL}upload-image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading feedback image:', error);
+    throw error;
+  }
+};
 
 //citas
 export const fetchCitas = async () => {

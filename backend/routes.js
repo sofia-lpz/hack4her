@@ -22,4 +22,9 @@ router.post("/register", controller.register);
 router.get("/summarized_feedback/:store_id", controller.summarizeFeedback);
 // ...existing code...
 
+
+router.get("/least_visited_stores", controller.getLeastVisitedStores);
+
+router.get("/stats", controller.getStats);
+
 export { router }
